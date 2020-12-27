@@ -1,0 +1,109 @@
+beacon_command_register(
+"read_function", 
+"Read in-memory API function call, compare to on-disk DLL and patch bytes from on-disk DLL.",
+"read_function ntdll.dll EtwEventWrite - Retrieve function bytes.");
+
+
+
+beacon_command_register(
+"check_function", 
+"Read in-memory API function call, compare to on-disk DLL and patch bytes from on-disk DLL.",
+"check_function ntdll.dll EtwEventWrite - Retrieve function bytes from memory and disk and compare.");
+
+
+beacon_command_register(
+"patch_function", 
+"Read in-memory API function call, compare to on-disk DLL and patch bytes from on-disk DLL.",
+"patch_function ntdll.dll EtwEventWrite - Write on-disk function bytes onto in-memory function.");
+
+
+
+
+alias read_function {
+	local('$barch $handle $data $args');
+
+	if(size(@_) != 3)
+	{
+		berror($1, "Incorrect usage!");
+		berror($1, beacon_command_detail("read_function"));
+		return;
+	}
+
+	# figure out the arch of this session
+	$barch  = barch($1);
+	
+	# read in the right BOF file
+	$handle = openf(script_resource("functionutil. $+ $barch $+ .o"));
+	$data   = readb($handle, -1);
+	closef($handle);
+
+	# pack our arguments
+	$args = bof_pack($1, "zzi", $2, $3, 0);
+	
+	# announce what we're doing
+	btask($1, "Running API Function Utility (@ajpc500)");
+	
+	# execute it.
+	beacon_inline_execute($1, $data, "go", $args);
+}
+
+
+
+
+alias check_function {
+	local('$barch $handle $data $args');
+
+	if(size(@_) != 3)
+	{
+		berror($1, "Incorrect usage!");
+		berror($1, beacon_command_detail("check_function"));
+		return;
+	}
+
+	# figure out the arch of this session
+	$barch  = barch($1);
+	
+	# read in the right BOF file
+	$handle = openf(script_resource("functionutil. $+ $barch $+ .o"));
+	$data   = readb($handle, -1);
+	closef($handle);
+
+	# pack our arguments
+	$args = bof_pack($1, "zzi", $2, $3, 1);
+	
+	# announce what we're doing
+	btask($1, "Running API Function Utility (@ajpc500)");
+
+	# execute it.
+	beacon_inline_execute($1, $data, "go", $args);
+}
+
+
+
+alias patch_function {
+	local('$barch $handle $data $args');
+
+	if(size(@_) != 3)
+	{
+		berror($1, "Incorrect usage!");
+		berror($1, beacon_command_detail("patch_function"));
+		return;
+	}
+
+	# figure out the arch of this session
+	$barch  = barch($1);
+	
+	# read in the right BOF file
+	$handle = openf(script_resource("functionutil. $+ $barch $+ .o"));
+	$data   = readb($handle, -1);
+	closef($handle);
+
+	# pack our arguments
+	$args = bof_pack($1, "zzi", $2, $3, 2);
+	
+	# announce what we're doing
+	btask($1, "Running API Function Utility (@ajpc500)");
+
+	# execute it.
+	beacon_inline_execute($1, $data, "go", $args);
+}
