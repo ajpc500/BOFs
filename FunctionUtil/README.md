@@ -74,18 +74,28 @@ c3
 
 beacon> check_function ntdll.dll EtwEventWrite
 [*] Running API Function Utility (@ajpc500)
-[+] host called home, sent: 5558 bytes
+[+] host called home, sent: 4727 bytes
+[+] received output:
+[*] Comparing 8 bytes of EtwEventWrite function(s) in ntdll.dll with on-disk version
 [+] received output:
 [!] EtwEventWrite function doesn't match on-disk.
+[+] received output:
+Loaded Module: c3 8b dc 48 83 ec 58 4d
+Ondisk Module: 4c 8b dc 48 83 ec 58 4d
 ```
 
 ### Patch Function
 ```
 beacon> check_function ntdll.dll EtwEventWrite
 [*] Running API Function Utility (@ajpc500)
-[+] host called home, sent: 5558 bytes
+[+] host called home, sent: 4727 bytes
+[+] received output:
+[*] Comparing 8 bytes of EtwEventWrite function(s) in ntdll.dll with on-disk version
 [+] received output:
 [!] EtwEventWrite function doesn't match on-disk.
+[+] received output:
+Loaded Module: c3 8b dc 48 83 ec 58 4d
+Ondisk Module: 4c 8b dc 48 83 ec 58 4d
 
 beacon> patch_function ntdll.dll EtwEventWrite
 [*] Running API Function Utility (@ajpc500)
@@ -97,7 +107,9 @@ beacon> patch_function ntdll.dll EtwEventWrite
 
 beacon> check_function ntdll.dll EtwEventWrite
 [*] Running API Function Utility (@ajpc500)
-[+] host called home, sent: 5558 bytes
+[+] host called home, sent: 4727 bytes
+[+] received output:
+[*] Comparing 8 bytes of EtwEventWrite function(s) in ntdll.dll with on-disk version
 [+] received output:
 [+] EtwEventWrite function matches on-disk.
 ```
