@@ -18,7 +18,7 @@ Beacon object file to:
 - Read relevant on-disk DLL and compare functions to identify differencies (e.g. EPP/EDR hooking)
 - Patch functions with the on-disk copy (i.e. API unhooking)
 
-Credit goes to @spottheplanet for the Dll parsing technique: https://www.ired.team/offensive-security/defense-evasion/retrieving-ntdll-syscall-stubs-at-run-time
+Credit goes to @spotheplanet for the Dll parsing technique: https://www.ired.team/offensive-security/defense-evasion/retrieving-ntdll-syscall-stubs-at-run-time
 
 
 ## Syscalls Shellcode Injection BOF (64-bit only)
