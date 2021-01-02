@@ -3,6 +3,7 @@
 1. ETW Patching
 2. API Function Utility
 3. Syscalls Shellcode Injection
+4. Spawn and Syscalls Shellcode Injection
 
 ## ETW Patching BOF
 
@@ -28,3 +29,8 @@ Beacon object file to:
 - Inject shellcode (either custom or beacon) into remote process using NtOpenProcess -> NtAllocateVirtualMemory -> NtWriteVirtualMemory -> NtCreateThreadEx.
 
 Credit also to @tomcarver16 for their DLL inject BOF and aggressor script (https://github.com/tomcarver16/BOF-DLL-Inject)
+
+
+## Spawn with Syscalls Shellcode Injection BOF (64-bit only)
+
+Same syscalls injection process as SyscallsInject (above) but uses `BeaconSpawnTemporaryProcess` to create the target process.
