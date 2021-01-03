@@ -14,7 +14,7 @@ Aggressor script included with the following commands:
 - `syscalls_spawn listener_name` - Injects shellcode for beacon into a spawned process. 
 - `syscalls_shspawn path_to_bin` - Injects custom shellcode into a spawned process.
 
-> NOTE: As we're using the beacon API for process spawn, we're not using syscalls, so bear that in mind. Spawning in this way does give us the spawnto, blockdlls and ppid spoof values applied. Although blockdlls currently causes the beacon launch to fail. 
+> NOTE: As we're using the beacon API for process spawn, we're not using syscalls, so bear that in mind. Spawning in this way does give us the spawnto, blockdlls and ppid spoofing settings applied though.  
 
 ### Custom shellcode
 ```
