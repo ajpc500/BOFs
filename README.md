@@ -4,6 +4,7 @@
 2. API Function Utility
 3. Syscalls Shellcode Injection
 4. Spawn and Syscalls Shellcode Injection
+5. Static Syscalls Shellcode Injection
 
 ## ETW Patching BOF
 
@@ -34,3 +35,12 @@ Credit also to @tomcarver16 for their DLL inject BOF and aggressor script (https
 ## Spawn with Syscalls Shellcode Injection BOF (64-bit only)
 
 Same syscalls injection process as SyscallsInject (above) but uses `BeaconSpawnTemporaryProcess` to create the target process.
+
+## Static Syscalls Shellcode Injection BOF (64-bit only)
+
+Beacon object file to:
+- Inject shellcode (either custom or beacon) into remote process using NtOpenProcess -> NtAllocateVirtualMemory -> NtWriteVirtualMemory -> NtCreateThreadEx.
+
+Same injection process as above, but using static Syscalls, rather than stubs fetched from Ntdll.
+
+Syscalls generated using @jthuraisamy's [SysWhispers](https://github.com/jthuraisamy/SysWhispers) and @Outflanknl's [InlineWhispers](https://github.com/outflanknl/InlineWhispers).
