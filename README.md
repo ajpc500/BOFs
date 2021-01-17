@@ -1,10 +1,15 @@
 # Beacon Object Files
 
-1. ETW Patching
-2. API Function Utility
-3. Syscalls Shellcode Injection
-4. Spawn and Syscalls Shellcode Injection
-5. Static Syscalls Shellcode Injection
+| Name                                         | Syntax                 | 
+| -------------------------------------------- | ---------------------- | 
+| ETW Patching                                 | `etw stop` / `etw start`   | 
+| API Function Utility                         | `read_function` / `check_function` / `patch_function <dll_path> <function_name>` | 
+| Syscalls Shellcode Injection                 | `syscalls_inject <PID> <listener_name>` / `syscalls_shinject <PID> <path_to_bin>` | 
+| Spawn and Syscalls Shellcode Injection       | `syscalls_spawn <PID> <listener>` / `syscalls_shspawn <PID> <path_to_bin>` | 
+| Static Syscalls Shellcode Injection          | `static_syscalls_inject <PID> <listener_name>` / `static_syscalls_shinject <PID> <path_to_bin>` | 
+| Static Syscalls Process Dump                 | `static_syscalls_dump <PID> [path_to_output]` | 
+
+
 
 ## ETW Patching BOF
 
@@ -44,3 +49,13 @@ Beacon object file to:
 Same injection process as above, but using static Syscalls, rather than stubs fetched from Ntdll.
 
 Syscalls generated using @jthuraisamy's [SysWhispers](https://github.com/jthuraisamy/SysWhispers) and @Outflanknl's [InlineWhispers](https://github.com/outflanknl/InlineWhispers).
+
+## Static Syscalls Process Dump BOF (64-bit only)
+
+Beacon object file to:
+- Unhook NtReadVirtualMemory function.
+- Create process memory dump using MiniDumpWriteDump function to specified (or default) location
+
+Syscalls generated using @jthuraisamy's [SysWhispers](https://github.com/jthuraisamy/SysWhispers) and @Outflanknl's [InlineWhispers](https://github.com/outflanknl/InlineWhispers).
+
+This is effectively a rough port of @Outflank's [Dumpert](https://github.com/outflanknl/Dumpert) tool. All credit to them for that.
