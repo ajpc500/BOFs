@@ -1,0 +1,141 @@
+popup beacon_top {
+    item "Curl"{
+        local('$bid');
+        foreach $bid ($1){
+            curl_dialog($bid);
+        }
+    }
+}
+
+sub curl_dialog{
+    $bid = $1;
+    $dialog = dialog("Curl", %(
+    	HTTPMethod => "GET", 
+    	Host => "", 
+    	Port => "",
+    	UserAgent => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", 
+    	Headers => "Accept: */*", 
+    	Body => "", 
+    	Print => "false"
+    ), lambda({
+        btask($bid, 'Executing Simple Web Request Utility @ajpc500');
+
+       	$barch  = barch($bid);
+
+        $printoutput = 0;
+		if ($3["Print"] eq "true"){
+			$printoutput = 1;
+		}
+
+		$args = bof_pack($bid, "zizizzz", 
+			$3["Host"], 
+			$3["Port"], 
+			$3["HTTPMethod"], 
+			$printoutput, 
+			$3["UserAgent"], 
+			$3["Headers"], 
+			$3["Body"]
+		);
+        
+		$handle = openf(script_resource("curl. $+ $barch $+ .o"));
+		$data   = readb($handle, -1);
+		closef($handle);
+
+        # execute it.
+       	beacon_inline_execute($bid, $data, "go", $args); 
+    }));
+
+    dialog_description($dialog, "Executing Simple Web Request.\nAdd 'https://' prefix for TLS.\nHeaders separated by new lines.");
+    drow_combobox($dialog, "HTTPMethod", "HTTP Method ", @("GET", "POST", "PUT", "PATCH", "DELETE"));
+    drow_text($dialog, 'Host', 'Host ');
+    drow_text($dialog, 'Port', 'Port ');
+    drow_text($dialog, 'UserAgent', 'User-Agent ');
+    drow_text_big($dialog, 'Headers', 'Headers ');
+    drow_text_big($dialog, 'Body', 'Body ');
+    drow_checkbox($dialog, 'Print', 'Print Response ');
+    dbutton_action($dialog, "Run");
+    dialog_show($dialog);
+}
+
+
+beacon_command_register(
+"curl", 
+"Performs a web request against target server and port",
+"curl host [port] [method] [--show] [useragent] [headers] [body]");
+
+alias curl {
+	local('$barch $handle $data $args');
+
+	if(size(@_) < 2)
+	{
+		berror($1, "Incorrect usage!");
+		berror($1, beacon_command_detail("curl"));
+		return;
+	}
+
+	# figure out the arch of this session
+	$barch  = barch($1);
+	
+	# read in the right BOF file
+	$handle = openf(script_resource("curl. $+ $barch $+ .o"));
+	$data   = readb($handle, -1);
+	closef($handle);
+
+	$printoutput = 0;
+	if ($5 eq "--show"){
+		$printoutput = 1;
+	}
+	
+	if (size(@_) >= 4){
+		if (($4 ne "GET") && 
+			($4 ne "POST") && 
+			($4 ne "PUT") && 
+			($4 ne "PATCH") && 
+			($4 ne "DELETE"))
+		{
+			berror($1, "HTTP method  $+ $4 $+  isn't valid.");
+			berror($1, beacon_command_detail("curl"));
+			return;
+		}
+	}
+
+	if(size(@_) == 2)
+	{
+		# pack our arguments
+		$args = bof_pack($1, "zizizzz", $2, 0, "GET", $printoutput, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", "Accept: */*", "");
+	
+	}else if(size(@_) == 3)
+	{
+		# pack our arguments
+		$args = bof_pack($1, "zizizzz", $2, $3, "GET", $printoutput, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", "Accept: */*", "");
+	
+	} else if(size(@_) == 4)
+	{
+
+		# include method
+		$args = bof_pack($1, "zizizzz", $2, $3, $4, $printoutput, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", "Accept: */*", "");
+	
+	} else if(size(@_) == 5)
+	{
+		# include print option
+		$args = bof_pack($1, "zizizzz", $2, $3, $4, $printoutput, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", "Accept: */*", "");
+	} else if(size(@_) == 6)
+	{
+		# include useragent
+		$args = bof_pack($1, "zizizzz", $2, $3, $4, $printoutput, $6, "Accept: */*", "");
+	} else if(size(@_) == 7)
+	{
+		# include useragent
+		$args = bof_pack($1, "zizizzz", $2, $3, $4, $printoutput, $6, $7, "");
+	} else if(size(@_) == 8)
+	{
+		# include useragent
+		$args = bof_pack($1, "zizizzz", $2, $3, $4, $printoutput, $6, $7, $8);
+	}
+
+	# announce what we're doing
+	btask($1, "Running Simple Web Request Utility (@ajpc500)");
+
+	# execute it.
+	beacon_inline_execute($1, $data, "go", $args);
+}
