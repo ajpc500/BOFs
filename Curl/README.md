@@ -5,6 +5,8 @@
 
 Beacon object file and associated aggressor to make simple web requests without establishing SOCKS PROXY. Example use case could be confirming outbound access to specific service before deploying a relay from [F-Secure's C3](https://github.com/FSecureLABS/C3).
 
+> NOTE: BOF is currently not proxy aware.
+
 ## Compile
 
 ```
