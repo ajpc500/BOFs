@@ -8,6 +8,7 @@
 | Spawn and Syscalls Shellcode Injection       | `syscalls_spawn <PID> <listener>` / `syscalls_shspawn <PID> <path_to_bin>` | 
 | Static Syscalls Shellcode Injection          | `static_syscalls_inject <PID> <listener_name>` / `static_syscalls_shinject <PID> <path_to_bin>` | 
 | Static Syscalls Process Dump                 | `static_syscalls_dump <PID> [path_to_output]` | 
+| Curl | `curl host [port] [method] [--show] [useragent] [headers] [body]` |
 
 
 
@@ -59,3 +60,7 @@ Beacon object file to:
 Syscalls generated using @jthuraisamy's [SysWhispers](https://github.com/jthuraisamy/SysWhispers) and @Outflanknl's [InlineWhispers](https://github.com/outflanknl/InlineWhispers).
 
 This is effectively a rough port of @Outflank's [Dumpert](https://github.com/outflanknl/Dumpert) tool. All credit to them for that.
+
+## Simple Web Utility BOF (Curl)
+
+Beacon object file and associated aggressor to make simple web requests without establishing SOCKS PROXY. Example use case could be confirming outbound access to specific service before deploying a relay from [F-Secure's C3](https://github.com/FSecureLABS/C3).
