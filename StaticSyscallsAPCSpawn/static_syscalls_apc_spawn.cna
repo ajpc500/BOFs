@@ -1,12 +1,12 @@
 beacon_command_register(
 "static_syscalls_apc_shspawn", 
 "Spawn process and use syscalls to execute custom shellcode launch with Nt functions (NtMapViewOfSection -> NtQueueUserApc).", 
-"Synopsis: syscalls_shspawn path_to_bin");
+"Synopsis: static_syscalls_apc_shspawn path_to_bin");
 
 beacon_command_register(
 "static_syscalls_apc_spawn", 
 "Spawn process and use syscalls to execute beacon shellcode launch with Nt functions (NtMapViewOfSection -> NtQueueUserApc).", 
-"Synopsis: syscalls_spawn listener_name");
+"Synopsis: static_syscalls_apc_spawn listener_name");
 
 alias static_syscalls_apc_shspawn {
 	local('$handle $data $args $sc_data');
