@@ -16,7 +16,8 @@ sub curl_dialog{
     	UserAgent => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", 
     	Headers => "Accept: */*", 
     	Body => "", 
-    	Print => "false"
+    	Proxy => "true",
+		Print => "false"
     ), lambda({
         btask($bid, 'Executing Simple Web Request Utility @ajpc500');
 
@@ -27,14 +28,20 @@ sub curl_dialog{
 			$printoutput = 1;
 		}
 
-		$args = bof_pack($bid, "zizizzz", 
+		$proxy = 0;
+		if ($3["Proxy"] eq "true"){
+			$proxy = 1;
+		}
+
+		$args = bof_pack($bid, "zizizzzi", 
 			$3["Host"], 
 			$3["Port"], 
 			$3["HTTPMethod"], 
 			$printoutput, 
 			$3["UserAgent"], 
 			$3["Headers"], 
-			$3["Body"]
+			$3["Body"],
+			$proxy
 		);
         
 		$handle = openf(script_resource("curl. $+ $barch $+ .o"));
@@ -52,7 +59,8 @@ sub curl_dialog{
     drow_text($dialog, 'UserAgent', 'User-Agent ');
     drow_text_big($dialog, 'Headers', 'Headers ');
     drow_text_big($dialog, 'Body', 'Body ');
-    drow_checkbox($dialog, 'Print', 'Print Response ');
+    drow_checkbox($dialog, 'Proxy', 'Autodetect Proxy ');
+	drow_checkbox($dialog, 'Print', 'Print Response ');
     dbutton_action($dialog, "Run");
     dialog_show($dialog);
 }
@@ -61,7 +69,7 @@ sub curl_dialog{
 beacon_command_register(
 "curl", 
 "Performs a web request against target server and port",
-"curl host [port] [method] [--show] [useragent] [headers] [body]");
+"curl host [port] [method] [--show] [useragent] [headers] [body] [--noproxy]");
 
 alias curl {
 	local('$barch $handle $data $args');
@@ -86,6 +94,11 @@ alias curl {
 		$printoutput = 1;
 	}
 	
+	$proxy = 1;
+	if ($5 eq "--noproxy"){
+		$proxy = 0;
+	}
+
 	if (size(@_) >= 4){
 		if (($4 ne "GET") && 
 			($4 ne "POST") && 
@@ -102,35 +115,39 @@ alias curl {
 	if(size(@_) == 2)
 	{
 		# pack our arguments
-		$args = bof_pack($1, "zizizzz", $2, 0, "GET", $printoutput, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", "Accept: */*", "");
+		$args = bof_pack($1, "zizizzzi", $2, 0, "GET", $printoutput, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", "Accept: */*", "", $proxy);
 	
 	}else if(size(@_) == 3)
 	{
 		# pack our arguments
-		$args = bof_pack($1, "zizizzz", $2, $3, "GET", $printoutput, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", "Accept: */*", "");
+		$args = bof_pack($1, "zizizzzi", $2, $3, "GET", $printoutput, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", "Accept: */*", "", $proxy);
 	
 	} else if(size(@_) == 4)
 	{
 
 		# include method
-		$args = bof_pack($1, "zizizzz", $2, $3, $4, $printoutput, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", "Accept: */*", "");
+		$args = bof_pack($1, "zizizzzi", $2, $3, $4, $printoutput, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", "Accept: */*", "", $proxy);
 	
 	} else if(size(@_) == 5)
 	{
 		# include print option
-		$args = bof_pack($1, "zizizzz", $2, $3, $4, $printoutput, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", "Accept: */*", "");
+		$args = bof_pack($1, "zizizzzi", $2, $3, $4, $printoutput, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36", "Accept: */*", "", $proxy);
 	} else if(size(@_) == 6)
 	{
 		# include useragent
-		$args = bof_pack($1, "zizizzz", $2, $3, $4, $printoutput, $6, "Accept: */*", "");
+		$args = bof_pack($1, "zizizzzi", $2, $3, $4, $printoutput, $6, "Accept: */*", "", $proxy);
 	} else if(size(@_) == 7)
 	{
-		# include useragent
-		$args = bof_pack($1, "zizizzz", $2, $3, $4, $printoutput, $6, $7, "");
+		# include headers
+		$args = bof_pack($1, "zizizzzi", $2, $3, $4, $printoutput, $6, $7, "", $proxy);
 	} else if(size(@_) == 8)
 	{
-		# include useragent
-		$args = bof_pack($1, "zizizzz", $2, $3, $4, $printoutput, $6, $7, $8);
+		# include body
+		$args = bof_pack($1, "zizizzzi", $2, $3, $4, $printoutput, $6, $7, $8, $proxy);
+	} else if(size(@_) == 9)
+	{
+		# include proxy choice
+		$args = bof_pack($1, "zizizzzi", $2, $3, $4, $printoutput, $6, $7, $8, $proxy);
 	}
 
 	# announce what we're doing

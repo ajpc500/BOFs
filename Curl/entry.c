@@ -18,9 +18,16 @@ DECLSPEC_IMPORT char *__cdecl MSVCRT$strtok(char * __restrict__ _Str,const char 
 WINBASEAPI char WINAPI MSVCRT$strcat(char *destination, const char *source);
 DECLSPEC_IMPORT int __cdecl MSVCRT$strcmp(const char *_Str1,const char *_Str2);
 
-void sendHttpRequest(char * method, char *host, char *uri, int port, char * useragent, char * headers, char * body, int tls, int printoutput){
+void sendHttpRequest(char * method, char *host, char *uri, int port, char * useragent, char * headers, char * body, int tls, int printoutput, int proxy){
 
-	HINTERNET hIntSession = WININET$InternetOpenA(useragent, INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
+	DWORD dwAccessType;
+	if(proxy==1){
+		dwAccessType = INTERNET_OPEN_TYPE_PRECONFIG;
+	} else {
+		dwAccessType = INTERNET_OPEN_TYPE_DIRECT;
+	}
+
+	HINTERNET hIntSession = WININET$InternetOpenA(useragent, dwAccessType, NULL, NULL, 0);
     HINTERNET hHttpSession = WININET$InternetConnectA(hIntSession, host, port, 0, 0, INTERNET_SERVICE_HTTP, 0, 0);
 
     DWORD internetFlags;
@@ -82,6 +89,7 @@ void go(char *args, int len) {
 	CHAR * useragent;
 	char * headers;
 	CHAR * body;
+	int proxy;
 
 	host = trimmed_host = BeaconDataExtract(&parser, NULL);
 	port = BeaconDataInt(&parser);
@@ -90,7 +98,8 @@ void go(char *args, int len) {
 	useragent = BeaconDataExtract(&parser, NULL);
 	headers = BeaconDataExtract(&parser, NULL);
 	body = BeaconDataExtract(&parser, NULL);
-	
+	proxy = BeaconDataInt(&parser);
+
 	int uri_element = 0;
     char * token = NULL;
     char * chunk;
@@ -99,6 +108,7 @@ void go(char *args, int len) {
 
     token = MSVCRT$strtok(host, s);
 
+	// process the URL string to discern TLS, host and URI
     while( token != NULL ) {
     	if(MSVCRT$strcmp(token, "http:") == 0){
     		if (port == 0) { port = 80; }
@@ -118,9 +128,10 @@ void go(char *args, int len) {
 	    uri_element++;
     }
 
+	// we'll assume port 80 unless we know otherwise, just to make usage simple
     if (port == 0) { port = 80; }
  
     BeaconPrintf(CALLBACK_OUTPUT, "%s %s:%i %s\nUser Agent: %s\n%s\n", method, trimmed_host, port, uri, useragent, headers);
    	
-	sendHttpRequest(method, trimmed_host, uri, port, useragent, headers, body, tls, printoutput);
+	sendHttpRequest(method, trimmed_host, uri, port, useragent, headers, body, tls, printoutput, proxy);
 }
