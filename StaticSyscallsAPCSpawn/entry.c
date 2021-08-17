@@ -32,7 +32,7 @@ VOID InjectShellcode(PROCESS_INFORMATION * pInfo, char* sc_ptr, SIZE_T sc_len) {
     // Allocating Read-Write-eXecute (RWX) memory for shellcode (opsec 101)    
     if (nts = NtCreateSection(&scHandle, SECTION_ALL_ACCESS, NULL, &li,
 		PAGE_EXECUTE_READWRITE, SEC_COMMIT, NULL) != STATUS_SUCCESS) {
-          BeaconPrintf(CALLBACK_ERROR,"NtMapViewOfSection - FAILED! %08X\n", nts);
+          BeaconPrintf(CALLBACK_ERROR,"NtCreateSection - FAILED! %08X\n", nts);
           return;
         }
 
