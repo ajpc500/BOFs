@@ -3,7 +3,7 @@
 Beacon object file to:
 - Inject shellcode (either custom or beacon) into remote process using NtOpenProcess -> NtAllocateVirtualMemory -> NtWriteVirtualMemory -> NtCreateThreadEx.
 
-Syscalls generated using @jthuraisamy's [SysWhispers](https://github.com/jthuraisamy/SysWhispers) and @Outflanknl's [InlineWhispers](https://github.com/outflanknl/InlineWhispers).
+Syscalls generated using @jthuraisamy's [SysWhispers2](https://github.com/jthuraisamy/SysWhispers2), @FalconForce's [SysWhispers2BOF](https://github.com/FalconForceTeam/SysWhispers2BOF) and @Outflanknl's [InlineWhispers](https://github.com/outflanknl/InlineWhispers).
 
 ## Compile
 

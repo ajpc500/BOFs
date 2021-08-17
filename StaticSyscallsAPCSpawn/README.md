@@ -3,7 +3,7 @@
 NtCreateSection -> NtMapViewOfSection -> NtQueueApcThread -> NtResumeThead.
 Uses `BeaconSpawnTemporaryProcess` to create the target process. 
 
-Syscalls generated using @jthuraisamy's [SysWhispers](https://github.com/jthuraisamy/SysWhispers) and @Outflanknl's [InlineWhispers](https://github.com/outflanknl/InlineWhispers).
+Syscalls generated using @jthuraisamy's [SysWhispers2](https://github.com/jthuraisamy/SysWhispers2), @FalconForce's [SysWhispers2BOF](https://github.com/FalconForceTeam/SysWhispers2BOF) and @Outflanknl's [InlineWhispers](https://github.com/outflanknl/InlineWhispers).
 
 Code adapted from @peperunas's [injectopi](https://github.com/peperunas/injectopi/blob/master/CreateSectionAPC/CreateSectionAPC.cpp)
 
