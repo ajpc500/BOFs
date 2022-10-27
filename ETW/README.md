@@ -13,14 +13,15 @@ i686-w64-mingw32-gcc -c etw.c -o etw.x86.o
 
 ## Usage
 
-Aggressor script included with `etw start` and `etw stop` commands.
+Aggressor script included with `etw start`, `etw stop`, and `etw status` commands.
 
 Patch bytes returned to confirm activity.
 
 ```
 beacon> help etw
-etw stop - patch out EtwEventWrite in Ntdll.dll to prevent ETW-based logging.
-etw start - patch back in EtwEventWrite in Ntdll.dll to restart ETW-based logging.
+etw stop   - patch out EtwEventWrite in Ntdll.dll to prevent ETW-based logging.
+etw start  - patch back in EtwEventWrite in Ntdll.dll to restart ETW-based logging.
+etw status - check the status of EtwEventWrite on current process.
 
 beacon> etw stop
 [*] Running ETW patching BOF (@ajpc500)

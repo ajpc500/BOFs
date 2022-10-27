@@ -9,6 +9,7 @@ DECLSPEC_IMPORT BOOL WINAPI KERNEL32$ReadProcessMemory(HANDLE, LPCVOID, LPVOID, 
 WINBASEAPI void *__cdecl MSVCRT$memcpy(void * __restrict _Dst,const void * __restrict _Src,size_t _MaxCount);
 DECLSPEC_IMPORT WINBASEAPI BOOL WINAPI KERNEL32$VirtualProtect (PVOID, DWORD, DWORD, PDWORD);
 DECLSPEC_IMPORT int __cdecl MSVCRT$strcmp(const char *_Str1,const char *_Str2);
+WINBASEAPI int __cdecl MSVCRT$memcmp(const void *_Buf1,const void *_Buf2,size_t _Size);
 
 
 void go(char *args, int len) {
@@ -54,6 +55,15 @@ void go(char *args, int len) {
 				patchbytes = startbytes;
 			}else if(MSVCRT$strcmp(action, "stop") == 0){
 				patchbytes = stopbytes;
+			}else if(MSVCRT$strcmp(action, "status") == 0){
+				if(MSVCRT$memcmp(startbytes, (PVOID)funcAddress, numByteToPatch) == 0)
+				{
+					BeaconPrintf(CALLBACK_OUTPUT, "ETW is enabled.",NULL);
+				}else
+				{
+					BeaconPrintf(CALLBACK_OUTPUT, "ETW is disable.",NULL);
+				}
+				return;
 			}
 
 			DWORD oldProt;

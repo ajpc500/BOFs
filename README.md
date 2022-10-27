@@ -2,7 +2,7 @@
 
 | Name                                         | Syntax                 | 
 | -------------------------------------------- | ---------------------- | 
-| ETW Patching                                 | `etw stop` / `etw start`   | 
+| ETW Patching                                 | `etw stop` / `etw start` / `etw status`  | 
 | API Function Utility                         | `read_function` / `check_function` / `patch_function <dll_path> <function_name>` | 
 | Syscalls Shellcode Injection                 | `syscalls_inject <PID> <listener_name>` / `syscalls_shinject <PID> <path_to_bin>` | 
 | Spawn and Syscalls Shellcode Injection       | `syscalls_spawn <listener>` / `syscalls_shspawn <path_to_bin>` | 
