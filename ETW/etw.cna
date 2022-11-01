@@ -1,8 +1,9 @@
 beacon_command_register(
 "etw", 
 "Start or stop ETW logging.", 
-"etw stop - patch out EtwEventWrite in Ntdll.dll to prevent ETW-based logging.
-etw start - patch back in EtwEventWrite in Ntdll.dll to restart ETW-based logging.");
+"etw stop   - patch out EtwEventWrite in Ntdll.dll to prevent ETW-based logging.
+etw start  - patch back in EtwEventWrite in Ntdll.dll to restart ETW-based logging.
+etw status - check the status of EtwEventWrite on current process.");
 
 alias etw {
 	local('$barch $handle $data $args');
@@ -14,7 +15,7 @@ alias etw {
 		return;
 	}
 
-	if(($2 eq "start")||($2 eq "stop"))
+	if(($2 eq "start")||($2 eq "stop")||($2 eq "status"))
 	{
 		# figure out the arch of this session
 		$barch  = barch($1);
